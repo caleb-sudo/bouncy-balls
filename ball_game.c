@@ -10,7 +10,7 @@
 #define player_size    20.0f
 #define SPEED          40.0f
 #define player_SPEED   7.0f
-#define max_shoots     1
+#define max_shoots     100
 #define B_SPEED        10.0f
 
 typedef struct Player {
@@ -120,17 +120,6 @@ static void InitGame(void) {
 		shoot[i].active = false;
 		shoot[i].position = (Vector2) { player.position.x, player.position.y };
 		shoot[i].radius = 2.5;
-		sx = GetRandomValue(-B_SPEED, B_SPEED);
-		sy = GetRandomValue(-B_SPEED, B_SPEED);
-		while (!correctRange) {
-			if ((sx == 0) || (sy == 0)) {
-				sx = GetRandomValue(-B_SPEED, B_SPEED);
-				sy = GetRandomValue(-B_SPEED, B_SPEED);
-			} else {
-				correctRange = true;
-			}
-		}
-		shoot[i].speed = (Vector2) { sx, sy };
 	}
 }
 
@@ -162,6 +151,13 @@ static void UpdateGame(void) {
 
 			player.collider = (Vector3) { player.position.x + sin(player.rotation*DEG2RAD)*(sh/2.5f), player.position.y - cos(player.rotation*DEG2RAD)*(sh/2.5f), 12 };
 
+			for (int i = 0; i < max_shoots; i++) {
+				if (shoot[i].position.x > ScreenWidth + h) shoot[i].active = false;
+				if (shoot[i].position.x < -(h)) shoot[i].active = false;
+				if (shoot[i].position.y > ScreenHeight +h) shoot[i].active = false;
+				if (shoot[i].position.y < -(h)) shoot[i].active = false;
+			}
+			
 			for (int i = 0; i < max_enemys; i++) {
 				if(IsKeyPressed(KEY_SPACE)) enemy[i].active = true;
 				if(enemy[i].active) {
@@ -191,10 +187,12 @@ static void UpdateGame(void) {
 					}
 				}
 			}
-			for (int i = 0; i < max_enemys; i++) {
+			for (int i = 0; i < max_shoots; i++) {
 				if (IsKeyPressed(KEY_Q)) shoot[i].active = true;
-				if (IsKeyUp(KEY_Q)) shoot[i].active = false;
 				if (shoot[i].active) {
+					rx = player.rotation.x;
+					ry = player.rotation.y;
+					shoot[i].speed = (Vector2) { rx, ry }
 					shoot[i].position.x += shoot[i].speed.x;
 					shoot[i].position.y += shoot[i].speed.y;
 				}
